@@ -1,0 +1,621 @@
+<!-- REPLACE YOUR ENTIRE SCRIPT WITH THIS VERSION -->
+<!-- MUCH BETTER CLASSROOM / BETTER PEOPLE / TEACHER / BETTER FARTS -->
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+
+<script>
+
+//////////////////////////////////////////////////////////
+// SCENE
+//////////////////////////////////////////////////////////
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xbdeee2, 30, 80);
+
+const camera = new THREE.PerspectiveCamera(
+75,
+window.innerWidth/window.innerHeight,
+0.1,
+1000
+);
+
+const renderer = new THREE.WebGLRenderer({
+    antialias:true
+});
+
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+document.body.appendChild(renderer.domElement);
+
+//////////////////////////////////////////////////////////
+// BACKGROUND
+//////////////////////////////////////////////////////////
+
+scene.background = new THREE.Color(0xb7f0e3);
+
+//////////////////////////////////////////////////////////
+// LIGHTING
+//////////////////////////////////////////////////////////
+
+const sun = new THREE.DirectionalLight(0xffffff,1.3);
+
+sun.position.set(10,20,10);
+sun.castShadow = true;
+
+sun.shadow.mapSize.width = 2048;
+sun.shadow.mapSize.height = 2048;
+
+scene.add(sun);
+
+scene.add(new THREE.AmbientLight(0xffffff,0.8));
+
+//////////////////////////////////////////////////////////
+// FLOOR
+//////////////////////////////////////////////////////////
+
+const floor = new THREE.Mesh(
+    new THREE.BoxGeometry(60,1,60),
+    new THREE.MeshPhongMaterial({
+        color:0x9b2d70
+    })
+);
+
+floor.receiveShadow = true;
+floor.position.y = -1;
+
+scene.add(floor);
+
+//////////////////////////////////////////////////////////
+// WALLS
+//////////////////////////////////////////////////////////
+
+function makeWall(w,h,d,x,y,z,color){
+
+    const wall = new THREE.Mesh(
+        new THREE.BoxGeometry(w,h,d),
+        new THREE.MeshPhongMaterial({
+            color:color
+        })
+    );
+
+    wall.position.set(x,y,z);
+
+    wall.receiveShadow = true;
+
+    scene.add(wall);
+}
+
+makeWall(60,18,1,0,8,-30,0x88d8aa);
+makeWall(60,18,1,0,8,30,0x88d8aa);
+makeWall(1,18,60,-30,8,0,0x7ed19f);
+makeWall(1,18,60,30,8,0,0x7ed19f);
+
+//////////////////////////////////////////////////////////
+// WINDOWS
+//////////////////////////////////////////////////////////
+
+for(let i=-18;i<=0;i+=9){
+
+    const frame = new THREE.Mesh(
+        new THREE.BoxGeometry(6,6,0.5),
+        new THREE.MeshPhongMaterial({
+            color:0xffffff
+        })
+    );
+
+    frame.position.set(i,8,-29.5);
+
+    scene.add(frame);
+
+    const glass = new THREE.Mesh(
+        new THREE.BoxGeometry(5.3,5.3,0.1),
+        new THREE.MeshPhongMaterial({
+            color:0x87ceeb,
+            transparent:true,
+            opacity:0.7
+        })
+    );
+
+    glass.position.set(i,8,-29.2);
+
+    scene.add(glass);
+}
+
+//////////////////////////////////////////////////////////
+// WHITEBOARD
+//////////////////////////////////////////////////////////
+
+const board = new THREE.Mesh(
+    new THREE.BoxGeometry(16,6,0.2),
+    new THREE.MeshPhongMaterial({
+        color:0xf8f8f8
+    })
+);
+
+board.position.set(0,9,-29.3);
+
+scene.add(board);
+
+//////////////////////////////////////////////////////////
+// CLOCK
+//////////////////////////////////////////////////////////
+
+const clock = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.3,1.3,0.2,32),
+    new THREE.MeshPhongMaterial({
+        color:0xff44aa
+    })
+);
+
+clock.rotation.x = Math.PI/2;
+
+clock.position.set(20,13,-29);
+
+scene.add(clock);
+
+//////////////////////////////////////////////////////////
+// POSTERS
+//////////////////////////////////////////////////////////
+
+function poster(x,y,z,color){
+
+    const p = new THREE.Mesh(
+        new THREE.BoxGeometry(3,4,0.1),
+        new THREE.MeshPhongMaterial({
+            color:color
+        })
+    );
+
+    p.position.set(x,y,z);
+
+    scene.add(p);
+}
+
+poster(16,8,-29,0x222288);
+poster(10,7,-29,0xffaa00);
+poster(-24,10,-29,0x000000);
+
+//////////////////////////////////////////////////////////
+// DESKS
+//////////////////////////////////////////////////////////
+
+function desk(x,z){
+
+    const top = new THREE.Mesh(
+        new THREE.BoxGeometry(3.5,0.4,2.5),
+        new THREE.MeshPhongMaterial({
+            color:0xff99dd
+        })
+    );
+
+    top.position.set(x,1.6,z);
+
+    top.castShadow = true;
+
+    scene.add(top);
+
+    for(let lx=-1.4; lx<=1.4; lx+=2.8){
+
+        for(let lz=-1; lz<=1; lz+=2){
+
+            const leg = new THREE.Mesh(
+                new THREE.BoxGeometry(0.18,2.8,0.18),
+                new THREE.MeshPhongMaterial({
+                    color:0x2244aa
+                })
+            );
+
+            leg.position.set(x+lx,0.2,z+lz);
+
+            scene.add(leg);
+        }
+    }
+
+    const chair = new THREE.Mesh(
+        new THREE.BoxGeometry(1.6,0.3,1.5),
+        new THREE.MeshPhongMaterial({
+            color:0xffb3e6
+        })
+    );
+
+    chair.position.set(x,0.5,z+2.5);
+
+    scene.add(chair);
+}
+
+//////////////////////////////////////////////////////////
+// RANDOM STUDENTS
+//////////////////////////////////////////////////////////
+
+const shirtColors = [
+0x222266,
+0x884444,
+0x228855,
+0xaa8822,
+0x444444
+];
+
+const skinColors = [
+0xffd1a3,
+0xd89a6b,
+0x8d5524
+];
+
+function student(x,z){
+
+    desk(x,z);
+
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(1.5,2.5,1),
+        new THREE.MeshPhongMaterial({
+            color:shirtColors[Math.floor(Math.random()*shirtColors.length)]
+        })
+    );
+
+    body.position.set(x,2.7,z+2);
+
+    body.castShadow = true;
+
+    scene.add(body);
+
+    const head = new THREE.Mesh(
+        new THREE.SphereGeometry(0.7,32,32),
+        new THREE.MeshPhongMaterial({
+            color:skinColors[Math.floor(Math.random()*skinColors.length)]
+        })
+    );
+
+    head.position.set(x,4.4,z+2);
+
+    scene.add(head);
+
+    //////////////////////////////////////////////////////
+    // RANDOM HAIR
+    //////////////////////////////////////////////////////
+
+    const hair = new THREE.Mesh(
+        new THREE.SphereGeometry(0.73,32,32),
+        new THREE.MeshPhongMaterial({
+            color:[
+                0x111111,
+                0x553311,
+                0xddcc88
+            ][Math.floor(Math.random()*3)]
+        })
+    );
+
+    hair.scale.y = 0.5;
+
+    hair.position.set(x,4.8,z+2);
+
+    scene.add(hair);
+
+    //////////////////////////////////////////////////////
+    // EYES
+    //////////////////////////////////////////////////////
+
+    const eyeGeo = new THREE.SphereGeometry(0.06);
+
+    const eyeMat = new THREE.MeshBasicMaterial({
+        color:0x000000
+    });
+
+    const eye1 = new THREE.Mesh(eyeGeo,eyeMat);
+    const eye2 = new THREE.Mesh(eyeGeo,eyeMat);
+
+    eye1.position.set(x-0.18,4.4,z+2.65);
+    eye2.position.set(x+0.18,4.4,z+2.65);
+
+    scene.add(eye1);
+    scene.add(eye2);
+}
+
+//////////////////////////////////////////////////////////
+// PLACE STUDENTS
+//////////////////////////////////////////////////////////
+
+for(let x=-14;x<=14;x+=7){
+
+    for(let z=-12;z<=8;z+=8){
+
+        student(x,z);
+    }
+}
+
+//////////////////////////////////////////////////////////
+// TEACHER
+//////////////////////////////////////////////////////////
+
+const teacherBody = new THREE.Mesh(
+    new THREE.BoxGeometry(2,4,1.2),
+    new THREE.MeshPhongMaterial({
+        color:0x663399
+    })
+);
+
+teacherBody.position.set(0,3,-20);
+
+scene.add(teacherBody);
+
+const teacherHead = new THREE.Mesh(
+    new THREE.SphereGeometry(0.9,32,32),
+    new THREE.MeshPhongMaterial({
+        color:0xffcc99
+    })
+);
+
+teacherHead.position.set(0,5.7,-20);
+
+scene.add(teacherHead);
+
+//////////////////////////////////////////////////////////
+// PLAYER DESK
+//////////////////////////////////////////////////////////
+
+const playerDesk = new THREE.Mesh(
+    new THREE.BoxGeometry(8,0.5,6),
+    new THREE.MeshPhongMaterial({
+        color:0xff9ddd
+    })
+);
+
+playerDesk.position.set(0,1,18);
+
+scene.add(playerDesk);
+
+//////////////////////////////////////////////////////////
+// PAPER
+//////////////////////////////////////////////////////////
+
+const paper = new THREE.Mesh(
+    new THREE.BoxGeometry(2.2,0.02,3),
+    new THREE.MeshPhongMaterial({
+        color:0xffffff
+    })
+);
+
+paper.rotation.x = -1.55;
+
+paper.position.set(0,1.3,17.5);
+
+scene.add(paper);
+
+//////////////////////////////////////////////////////////
+// CAMERA
+//////////////////////////////////////////////////////////
+
+camera.position.set(0,5,24);
+
+//////////////////////////////////////////////////////////
+// UI
+//////////////////////////////////////////////////////////
+
+let fartTimer = 10;
+let gameOver = false;
+let micVolume = 0;
+
+//////////////////////////////////////////////////////////
+// MIC
+//////////////////////////////////////////////////////////
+
+navigator.mediaDevices.getUserMedia({audio:true})
+.then(stream=>{
+
+    const ctx = new AudioContext();
+
+    const src = ctx.createMediaStreamSource(stream);
+
+    const analyser = ctx.createAnalyser();
+
+    analyser.fftSize = 256;
+
+    src.connect(analyser);
+
+    const data = new Uint8Array(analyser.frequencyBinCount);
+
+    function micLoop(){
+
+        analyser.getByteFrequencyData(data);
+
+        let values = 0;
+
+        for(let i=0;i<data.length;i++){
+            values += data[i];
+        }
+
+        micVolume = values/data.length;
+
+        document.getElementById("mic").innerText =
+        Math.floor(micVolume);
+
+        requestAnimationFrame(micLoop);
+    }
+
+    micLoop();
+});
+
+//////////////////////////////////////////////////////////
+// BETTER FART SOUND
+//////////////////////////////////////////////////////////
+
+function fart(){
+
+    if(gameOver) return;
+
+    const ctx = new AudioContext();
+
+    //////////////////////////////////////////////////////
+    // MAIN FART NOISE
+    //////////////////////////////////////////////////////
+
+    const bufferSize = ctx.sampleRate * 1;
+
+    const buffer = ctx.createBuffer(
+        1,
+        bufferSize,
+        ctx.sampleRate
+    );
+
+    const output = buffer.getChannelData(0);
+
+    for(let i=0;i<bufferSize;i++){
+
+        output[i] =
+        (Math.random()*2-1) *
+        Math.pow(1 - i/bufferSize,2);
+    }
+
+    const noise = ctx.createBufferSource();
+
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+
+    filter.type = "lowpass";
+    filter.frequency.value = 250;
+
+    const gain = ctx.createGain();
+
+    gain.gain.setValueAtTime(1,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        ctx.currentTime+1
+    );
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    noise.start();
+
+    //////////////////////////////////////////////////////
+    // CHEEK FLAP SOUND
+    //////////////////////////////////////////////////////
+
+    const osc = ctx.createOscillator();
+
+    osc.type = "square";
+
+    osc.frequency.setValueAtTime(90,ctx.currentTime);
+
+    osc.frequency.exponentialRampToValueAtTime(
+        40,
+        ctx.currentTime+0.5
+    );
+
+    const oscGain = ctx.createGain();
+
+    oscGain.gain.setValueAtTime(0.2,ctx.currentTime);
+
+    oscGain.gain.exponentialRampToValueAtTime(
+        0.001,
+        ctx.currentTime+0.5
+    );
+
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime+0.5);
+
+    //////////////////////////////////////////////////////
+    // CHECK IF COUGHED
+    //////////////////////////////////////////////////////
+
+    if(micVolume < 35){
+
+        lose();
+    }
+
+    fartTimer = 10;
+}
+
+//////////////////////////////////////////////////////////
+// LOSE
+//////////////////////////////////////////////////////////
+
+function lose(){
+
+    gameOver = true;
+
+    document.getElementById("loseScreen").style.display = "flex";
+}
+
+//////////////////////////////////////////////////////////
+// RETRY
+//////////////////////////////////////////////////////////
+
+function retryGame(){
+
+    gameOver = false;
+
+    fartTimer = 10;
+
+    document.getElementById("loseScreen").style.display = "none";
+}
+
+//////////////////////////////////////////////////////////
+// TIMER
+//////////////////////////////////////////////////////////
+
+setInterval(()=>{
+
+    if(gameOver) return;
+
+    fartTimer--;
+
+    document.getElementById("timer").innerText =
+    fartTimer;
+
+    if(fartTimer <= 0){
+
+        fart();
+    }
+
+},1000);
+
+//////////////////////////////////////////////////////////
+// CONTROLS
+//////////////////////////////////////////////////////////
+
+document.addEventListener("keydown",e=>{
+
+    if(e.code === "Space"){
+
+        fart();
+    }
+});
+
+//////////////////////////////////////////////////////////
+// RENDER LOOP
+//////////////////////////////////////////////////////////
+
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    renderer.render(scene,camera);
+}
+
+animate();
+
+//////////////////////////////////////////////////////////
+// RESIZE
+//////////////////////////////////////////////////////////
+
+window.addEventListener("resize",()=>{
+
+    camera.aspect =
+    window.innerWidth/window.innerHeight;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+});
+
+</script>
