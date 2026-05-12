@@ -1,16 +1,102 @@
-<!-- REPLACE YOUR ENTIRE SCRIPT WITH THIS VERSION -->
-<!-- MUCH BETTER CLASSROOM / BETTER PEOPLE / TEACHER / BETTER FARTS -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silent Fart Simulator</title>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:Arial, sans-serif;
+    background:black;
+}
 
-<script>
+canvas{
+    display:block;
+}
+
+#ui{
+    position:absolute;
+    top:20px;
+    left:20px;
+    color:white;
+    font-size:28px;
+    z-index:10;
+    text-shadow:2px 2px 6px black;
+}
+
+#crosshair{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    font-size:24px;
+    z-index:10;
+}
+
+#loseScreen{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.9);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    color:white;
+    z-index:20;
+}
+
+#loseScreen h1{
+    font-size:70px;
+    margin:0;
+}
+
+button{
+    padding:15px 35px;
+    font-size:28px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="ui">
+    Time Until Auto Fart:
+    <span id="timer">10</span>
+    <br>
+    Mic Loudness:
+    <span id="mic">0</span>
+</div>
+
+<div id="crosshair">•</div>
+
+<div id="loseScreen">
+    <h1>THE CLASS HEARD YOU 💀</h1>
+    <br>
+    <button onclick="retryGame()">Retry</button>
+</div>
+
+<script type="module">
+
+//////////////////////////////////////////////////////////
+// IMPORT THREEJS
+//////////////////////////////////////////////////////////
+
+import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
 
 //////////////////////////////////////////////////////////
 // SCENE
 //////////////////////////////////////////////////////////
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0xbdeee2, 30, 80);
+
+scene.background = new THREE.Color(0xa8f0d1);
 
 const camera = new THREE.PerspectiveCamera(
 75,
@@ -23,47 +109,49 @@ const renderer = new THREE.WebGLRenderer({
     antialias:true
 });
 
-renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 document.body.appendChild(renderer.domElement);
-
-//////////////////////////////////////////////////////////
-// BACKGROUND
-//////////////////////////////////////////////////////////
-
-scene.background = new THREE.Color(0xb7f0e3);
 
 //////////////////////////////////////////////////////////
 // LIGHTING
 //////////////////////////////////////////////////////////
 
-const sun = new THREE.DirectionalLight(0xffffff,1.3);
+const sun = new THREE.DirectionalLight(
+    0xffffff,
+    1.5
+);
 
-sun.position.set(10,20,10);
+sun.position.set(20,30,20);
+
 sun.castShadow = true;
-
-sun.shadow.mapSize.width = 2048;
-sun.shadow.mapSize.height = 2048;
 
 scene.add(sun);
 
-scene.add(new THREE.AmbientLight(0xffffff,0.8));
+scene.add(new THREE.AmbientLight(
+    0xffffff,
+    0.7
+));
 
 //////////////////////////////////////////////////////////
 // FLOOR
 //////////////////////////////////////////////////////////
 
 const floor = new THREE.Mesh(
-    new THREE.BoxGeometry(60,1,60),
+    new THREE.BoxGeometry(70,1,70),
     new THREE.MeshPhongMaterial({
-        color:0x9b2d70
+        color:0x8b2c66
     })
 );
 
-floor.receiveShadow = true;
 floor.position.y = -1;
+
+floor.receiveShadow = true;
 
 scene.add(floor);
 
@@ -76,41 +164,39 @@ function makeWall(w,h,d,x,y,z,color){
     const wall = new THREE.Mesh(
         new THREE.BoxGeometry(w,h,d),
         new THREE.MeshPhongMaterial({
-            color:color
+            color
         })
     );
 
     wall.position.set(x,y,z);
 
-    wall.receiveShadow = true;
-
     scene.add(wall);
 }
 
-makeWall(60,18,1,0,8,-30,0x88d8aa);
-makeWall(60,18,1,0,8,30,0x88d8aa);
-makeWall(1,18,60,-30,8,0,0x7ed19f);
-makeWall(1,18,60,30,8,0,0x7ed19f);
+makeWall(70,20,1,0,9,-35,0x7fe0a7);
+makeWall(70,20,1,0,9,35,0x7fe0a7);
+makeWall(1,20,70,-35,9,0,0x73d89a);
+makeWall(1,20,70,35,9,0,0x73d89a);
 
 //////////////////////////////////////////////////////////
 // WINDOWS
 //////////////////////////////////////////////////////////
 
-for(let i=-18;i<=0;i+=9){
+for(let i=-22;i<=0;i+=11){
 
     const frame = new THREE.Mesh(
-        new THREE.BoxGeometry(6,6,0.5),
+        new THREE.BoxGeometry(7,6,0.5),
         new THREE.MeshPhongMaterial({
             color:0xffffff
         })
     );
 
-    frame.position.set(i,8,-29.5);
+    frame.position.set(i,9,-34.5);
 
     scene.add(frame);
 
     const glass = new THREE.Mesh(
-        new THREE.BoxGeometry(5.3,5.3,0.1),
+        new THREE.BoxGeometry(6.2,5.2,0.1),
         new THREE.MeshPhongMaterial({
             color:0x87ceeb,
             transparent:true,
@@ -118,7 +204,7 @@ for(let i=-18;i<=0;i+=9){
         })
     );
 
-    glass.position.set(i,8,-29.2);
+    glass.position.set(i,9,-34.2);
 
     scene.add(glass);
 }
@@ -128,13 +214,13 @@ for(let i=-18;i<=0;i+=9){
 //////////////////////////////////////////////////////////
 
 const board = new THREE.Mesh(
-    new THREE.BoxGeometry(16,6,0.2),
+    new THREE.BoxGeometry(18,6,0.2),
     new THREE.MeshPhongMaterial({
-        color:0xf8f8f8
+        color:0xffffff
     })
 );
 
-board.position.set(0,9,-29.3);
+board.position.set(0,10,-34);
 
 scene.add(board);
 
@@ -143,15 +229,15 @@ scene.add(board);
 //////////////////////////////////////////////////////////
 
 const clock = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.3,1.3,0.2,32),
+    new THREE.CylinderGeometry(1.5,1.5,0.3,32),
     new THREE.MeshPhongMaterial({
-        color:0xff44aa
+        color:0xff55cc
     })
 );
 
 clock.rotation.x = Math.PI/2;
 
-clock.position.set(20,13,-29);
+clock.position.set(24,15,-34);
 
 scene.add(clock);
 
@@ -162,9 +248,9 @@ scene.add(clock);
 function poster(x,y,z,color){
 
     const p = new THREE.Mesh(
-        new THREE.BoxGeometry(3,4,0.1),
+        new THREE.BoxGeometry(4,5,0.1),
         new THREE.MeshPhongMaterial({
-            color:color
+            color
         })
     );
 
@@ -173,9 +259,9 @@ function poster(x,y,z,color){
     scene.add(p);
 }
 
-poster(16,8,-29,0x222288);
-poster(10,7,-29,0xffaa00);
-poster(-24,10,-29,0x000000);
+poster(16,10,-34,0x222288);
+poster(10,8,-34,0xffaa00);
+poster(-24,12,-34,0x000000);
 
 //////////////////////////////////////////////////////////
 // DESKS
@@ -184,63 +270,67 @@ poster(-24,10,-29,0x000000);
 function desk(x,z){
 
     const top = new THREE.Mesh(
-        new THREE.BoxGeometry(3.5,0.4,2.5),
+        new THREE.BoxGeometry(4,0.4,3),
         new THREE.MeshPhongMaterial({
             color:0xff99dd
         })
     );
 
-    top.position.set(x,1.6,z);
+    top.position.set(x,2,z);
 
     top.castShadow = true;
 
     scene.add(top);
 
-    for(let lx=-1.4; lx<=1.4; lx+=2.8){
+    for(let lx=-1.5; lx<=1.5; lx+=3){
 
         for(let lz=-1; lz<=1; lz+=2){
 
             const leg = new THREE.Mesh(
-                new THREE.BoxGeometry(0.18,2.8,0.18),
+                new THREE.BoxGeometry(0.2,3,0.2),
                 new THREE.MeshPhongMaterial({
                     color:0x2244aa
                 })
             );
 
-            leg.position.set(x+lx,0.2,z+lz);
+            leg.position.set(x+lx,0.5,z+lz);
 
             scene.add(leg);
         }
     }
 
+    //////////////////////////////////////////////////////
+    // CHAIR
+    //////////////////////////////////////////////////////
+
     const chair = new THREE.Mesh(
-        new THREE.BoxGeometry(1.6,0.3,1.5),
+        new THREE.BoxGeometry(1.8,0.3,1.8),
         new THREE.MeshPhongMaterial({
-            color:0xffb3e6
+            color:0xffb6e6
         })
     );
 
-    chair.position.set(x,0.5,z+2.5);
+    chair.position.set(x,0.8,z+3);
 
     scene.add(chair);
 }
 
 //////////////////////////////////////////////////////////
-// RANDOM STUDENTS
+// STUDENTS
 //////////////////////////////////////////////////////////
 
 const shirtColors = [
-0x222266,
-0x884444,
+0x223388,
+0xaa3333,
 0x228855,
 0xaa8822,
-0x444444
+0x555555
 ];
 
-const skinColors = [
-0xffd1a3,
-0xd89a6b,
-0x8d5524
+const hairColors = [
+0x111111,
+0x553311,
+0xddcc88
 ];
 
 function student(x,z){
@@ -248,77 +338,48 @@ function student(x,z){
     desk(x,z);
 
     const body = new THREE.Mesh(
-        new THREE.BoxGeometry(1.5,2.5,1),
+        new THREE.BoxGeometry(1.7,3,1.2),
         new THREE.MeshPhongMaterial({
-            color:shirtColors[Math.floor(Math.random()*shirtColors.length)]
+            color:shirtColors[
+                Math.floor(Math.random()*shirtColors.length)
+            ]
         })
     );
 
-    body.position.set(x,2.7,z+2);
-
-    body.castShadow = true;
+    body.position.set(x,3.7,z+2.3);
 
     scene.add(body);
 
     const head = new THREE.Mesh(
-        new THREE.SphereGeometry(0.7,32,32),
+        new THREE.SphereGeometry(0.8,32,32),
         new THREE.MeshPhongMaterial({
-            color:skinColors[Math.floor(Math.random()*skinColors.length)]
+            color:0xffcc99
         })
     );
 
-    head.position.set(x,4.4,z+2);
+    head.position.set(x,6,z+2.3);
 
     scene.add(head);
 
-    //////////////////////////////////////////////////////
-    // RANDOM HAIR
-    //////////////////////////////////////////////////////
-
     const hair = new THREE.Mesh(
-        new THREE.SphereGeometry(0.73,32,32),
+        new THREE.SphereGeometry(0.82,32,32),
         new THREE.MeshPhongMaterial({
-            color:[
-                0x111111,
-                0x553311,
-                0xddcc88
-            ][Math.floor(Math.random()*3)]
+            color:hairColors[
+                Math.floor(Math.random()*hairColors.length)
+            ]
         })
     );
 
     hair.scale.y = 0.5;
 
-    hair.position.set(x,4.8,z+2);
+    hair.position.set(x,6.4,z+2.3);
 
     scene.add(hair);
-
-    //////////////////////////////////////////////////////
-    // EYES
-    //////////////////////////////////////////////////////
-
-    const eyeGeo = new THREE.SphereGeometry(0.06);
-
-    const eyeMat = new THREE.MeshBasicMaterial({
-        color:0x000000
-    });
-
-    const eye1 = new THREE.Mesh(eyeGeo,eyeMat);
-    const eye2 = new THREE.Mesh(eyeGeo,eyeMat);
-
-    eye1.position.set(x-0.18,4.4,z+2.65);
-    eye2.position.set(x+0.18,4.4,z+2.65);
-
-    scene.add(eye1);
-    scene.add(eye2);
 }
 
-//////////////////////////////////////////////////////////
-// PLACE STUDENTS
-//////////////////////////////////////////////////////////
+for(let x=-18;x<=18;x+=9){
 
-for(let x=-14;x<=14;x+=7){
-
-    for(let z=-12;z<=8;z+=8){
+    for(let z=-16;z<=10;z+=9){
 
         student(x,z);
     }
@@ -329,24 +390,24 @@ for(let x=-14;x<=14;x+=7){
 //////////////////////////////////////////////////////////
 
 const teacherBody = new THREE.Mesh(
-    new THREE.BoxGeometry(2,4,1.2),
+    new THREE.BoxGeometry(2.2,4,1.4),
     new THREE.MeshPhongMaterial({
         color:0x663399
     })
 );
 
-teacherBody.position.set(0,3,-20);
+teacherBody.position.set(0,4,-23);
 
 scene.add(teacherBody);
 
 const teacherHead = new THREE.Mesh(
-    new THREE.SphereGeometry(0.9,32,32),
+    new THREE.SphereGeometry(1,32,32),
     new THREE.MeshPhongMaterial({
         color:0xffcc99
     })
 );
 
-teacherHead.position.set(0,5.7,-20);
+teacherHead.position.set(0,7,-23);
 
 scene.add(teacherHead);
 
@@ -355,73 +416,70 @@ scene.add(teacherHead);
 //////////////////////////////////////////////////////////
 
 const playerDesk = new THREE.Mesh(
-    new THREE.BoxGeometry(8,0.5,6),
+    new THREE.BoxGeometry(9,0.5,7),
     new THREE.MeshPhongMaterial({
-        color:0xff9ddd
+        color:0xff99dd
     })
 );
 
-playerDesk.position.set(0,1,18);
+playerDesk.position.set(0,1.5,22);
 
 scene.add(playerDesk);
-
-//////////////////////////////////////////////////////////
-// PAPER
-//////////////////////////////////////////////////////////
-
-const paper = new THREE.Mesh(
-    new THREE.BoxGeometry(2.2,0.02,3),
-    new THREE.MeshPhongMaterial({
-        color:0xffffff
-    })
-);
-
-paper.rotation.x = -1.55;
-
-paper.position.set(0,1.3,17.5);
-
-scene.add(paper);
 
 //////////////////////////////////////////////////////////
 // CAMERA
 //////////////////////////////////////////////////////////
 
-camera.position.set(0,5,24);
+camera.position.set(0,7,30);
 
 //////////////////////////////////////////////////////////
-// UI
+// GAME VARIABLES
 //////////////////////////////////////////////////////////
 
 let fartTimer = 10;
-let gameOver = false;
 let micVolume = 0;
+let gameOver = false;
 
 //////////////////////////////////////////////////////////
-// MIC
+// LOAD FART SOUND
 //////////////////////////////////////////////////////////
 
-navigator.mediaDevices.getUserMedia({audio:true})
+const fartSound = new Audio("fart.mp3");
+
+//////////////////////////////////////////////////////////
+// MICROPHONE
+//////////////////////////////////////////////////////////
+
+navigator.mediaDevices.getUserMedia({
+    audio:true
+})
 .then(stream=>{
 
     const ctx = new AudioContext();
 
-    const src = ctx.createMediaStreamSource(stream);
+    const source =
+    ctx.createMediaStreamSource(stream);
 
-    const analyser = ctx.createAnalyser();
+    const analyser =
+    ctx.createAnalyser();
 
     analyser.fftSize = 256;
 
-    src.connect(analyser);
+    source.connect(analyser);
 
-    const data = new Uint8Array(analyser.frequencyBinCount);
+    const data =
+    new Uint8Array(
+        analyser.frequencyBinCount
+    );
 
-    function micLoop(){
+    function updateMic(){
 
         analyser.getByteFrequencyData(data);
 
         let values = 0;
 
         for(let i=0;i<data.length;i++){
+
             values += data[i];
         }
 
@@ -430,98 +488,26 @@ navigator.mediaDevices.getUserMedia({audio:true})
         document.getElementById("mic").innerText =
         Math.floor(micVolume);
 
-        requestAnimationFrame(micLoop);
+        requestAnimationFrame(updateMic);
     }
 
-    micLoop();
+    updateMic();
 });
 
 //////////////////////////////////////////////////////////
-// BETTER FART SOUND
+// FART
 //////////////////////////////////////////////////////////
 
 function fart(){
 
     if(gameOver) return;
 
-    const ctx = new AudioContext();
+    fartSound.currentTime = 0;
+
+    fartSound.play();
 
     //////////////////////////////////////////////////////
-    // MAIN FART NOISE
-    //////////////////////////////////////////////////////
-
-    const bufferSize = ctx.sampleRate * 1;
-
-    const buffer = ctx.createBuffer(
-        1,
-        bufferSize,
-        ctx.sampleRate
-    );
-
-    const output = buffer.getChannelData(0);
-
-    for(let i=0;i<bufferSize;i++){
-
-        output[i] =
-        (Math.random()*2-1) *
-        Math.pow(1 - i/bufferSize,2);
-    }
-
-    const noise = ctx.createBufferSource();
-
-    noise.buffer = buffer;
-
-    const filter = ctx.createBiquadFilter();
-
-    filter.type = "lowpass";
-    filter.frequency.value = 250;
-
-    const gain = ctx.createGain();
-
-    gain.gain.setValueAtTime(1,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        ctx.currentTime+1
-    );
-
-    noise.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-
-    noise.start();
-
-    //////////////////////////////////////////////////////
-    // CHEEK FLAP SOUND
-    //////////////////////////////////////////////////////
-
-    const osc = ctx.createOscillator();
-
-    osc.type = "square";
-
-    osc.frequency.setValueAtTime(90,ctx.currentTime);
-
-    osc.frequency.exponentialRampToValueAtTime(
-        40,
-        ctx.currentTime+0.5
-    );
-
-    const oscGain = ctx.createGain();
-
-    oscGain.gain.setValueAtTime(0.2,ctx.currentTime);
-
-    oscGain.gain.exponentialRampToValueAtTime(
-        0.001,
-        ctx.currentTime+0.5
-    );
-
-    osc.connect(oscGain);
-    oscGain.connect(ctx.destination);
-
-    osc.start();
-    osc.stop(ctx.currentTime+0.5);
-
-    //////////////////////////////////////////////////////
-    // CHECK IF COUGHED
+    // CHECK IF PLAYER COUGHED
     //////////////////////////////////////////////////////
 
     if(micVolume < 35){
@@ -540,20 +526,22 @@ function lose(){
 
     gameOver = true;
 
-    document.getElementById("loseScreen").style.display = "flex";
+    document.getElementById("loseScreen")
+    .style.display = "flex";
 }
 
 //////////////////////////////////////////////////////////
 // RETRY
 //////////////////////////////////////////////////////////
 
-function retryGame(){
+window.retryGame = function(){
 
     gameOver = false;
 
     fartTimer = 10;
 
-    document.getElementById("loseScreen").style.display = "none";
+    document.getElementById("loseScreen")
+    .style.display = "none";
 }
 
 //////////////////////////////////////////////////////////
@@ -566,8 +554,8 @@ setInterval(()=>{
 
     fartTimer--;
 
-    document.getElementById("timer").innerText =
-    fartTimer;
+    document.getElementById("timer")
+    .innerText = fartTimer;
 
     if(fartTimer <= 0){
 
@@ -577,10 +565,10 @@ setInterval(()=>{
 },1000);
 
 //////////////////////////////////////////////////////////
-// CONTROLS
+// SPACEBAR
 //////////////////////////////////////////////////////////
 
-document.addEventListener("keydown",e=>{
+document.addEventListener("keydown",(e)=>{
 
     if(e.code === "Space"){
 
@@ -589,7 +577,7 @@ document.addEventListener("keydown",e=>{
 });
 
 //////////////////////////////////////////////////////////
-// RENDER LOOP
+// ANIMATION
 //////////////////////////////////////////////////////////
 
 function animate(){
@@ -619,3 +607,6 @@ window.addEventListener("resize",()=>{
 });
 
 </script>
+
+</body>
+</html>
